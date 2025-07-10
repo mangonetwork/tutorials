@@ -6,3 +6,5 @@ pandas
 xarray
 h5py
 beautifulsoup4
+cartopy
+madrigalWeb

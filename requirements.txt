@@ -6,5 +6,6 @@ pandas
 xarray
 h5py
 beautifulsoup4
+ipywidgets
 cartopy
 madrigalWeb

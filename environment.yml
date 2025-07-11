@@ -10,6 +10,7 @@ dependencies:
   - xarray
   - h5py
   - beautifulsoup4
+  - ipywidgets
   - cartopy
   - pip
   - pip:

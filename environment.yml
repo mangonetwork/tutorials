@@ -1,0 +1,16 @@
+name: buildjupyterbook
+channels:
+  - conda-forge
+dependencies:
+  - jupyter-book
+  - matplotlib
+  - numpy
+  - scipy
+  - pandas
+  - xarray
+  - h5py
+  - beautifulsoup4
+  - cartopy
+  - pip
+  - pip:
+      - madrigalWeb

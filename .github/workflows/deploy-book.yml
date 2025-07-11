@@ -1,0 +1,41 @@
+name: deploy-book
+
+# Only run this when the master branch changes
+on:
+  push:
+    branches:
+    - main
+
+permissions:
+  contents: write
+
+# This job installs dependencies, builds the book, and pushes it to `gh-pages`
+jobs:
+  deploy-book:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout latest push
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        activate-environment: buildjupyterbook
+        environment-file: environment.yml
+        python-version: '3.12'
+
+
+    # Build the book
+    - name: Build the book
+      shell: bash -el {0}
+      run: |
+        conda activate buildjupyterbook
+        jupyter-book build --all .
+
+    # Push the book's HTML to github-pages
+    - name: GitHub Pages action
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: _build/html

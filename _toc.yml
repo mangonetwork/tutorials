@@ -4,6 +4,5 @@
 format: jb-book
 root: src/intro
 chapters:
-- file: src/markdown
 - file: src/MANGO_Demo_CEDAR_2024
 - file: src/FPI_tutorial

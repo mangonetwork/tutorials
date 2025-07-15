@@ -54,15 +54,26 @@ for exp in expList:
 
 ------------------
 
+----- stdout -----
+MANGO_Data/minime11_low_20230509.cedar.034.hdf5
+----- stderr -----
+/usr/share/miniconda/envs/buildjupyterbook/lib/python3.12/site-packages/madrigalWeb/madrigalWeb.py:638: SyntaxWarning: invalid escape sequence '\g'
+  filters = re.sub(',([a-zA-Z])', '?\g<1>', filters)
+------------------
 
 [31m---------------------------------------------------------------------------[39m
-[31mNameError[39m                                 Traceback (most recent call last)
-[36mCell[39m[36m [39m[32mIn[2][39m[32m, line 24[39m
-[32m     20[39m fileList = madrigalObj.getExperimentFiles(exp.id)
-[32m     22[39m [38;5;28;01mfor[39;00m file [38;5;129;01min[39;00m fileList:
-[32m---> [39m[32m24[39m     outFile = [43mos[49m.path.join(asi_directory, os.path.basename(file.name))
-[32m     25[39m     [38;5;28mprint[39m(outFile)
-[32m     26[39m     madrigalObj.downloadFile(file.name, outFile, user_fullname, user_email, user_affiliation, [38;5;28mformat[39m=[33m'[39m[33mhdf5[39m[33m'[39m)
+[31mFileNotFoundError[39m                         Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[3][39m[32m, line 26[39m
+[32m     24[39m outFile = os.path.join(asi_directory, os.path.basename(file.name))
+[32m     25[39m [38;5;28mprint[39m(outFile)
+[32m---> [39m[32m26[39m [43mmadrigalObj[49m[43m.[49m[43mdownloadFile[49m[43m([49m[43mfile[49m[43m.[49m[43mname[49m[43m,[49m[43m [49m[43moutFile[49m[43m,[49m[43m [49m[43muser_fullname[49m[43m,[49m[43m [49m[43muser_email[49m[43m,[49m[43m [49m[43muser_affiliation[49m[43m,[49m[43m [49m[38;5;28;43mformat[39;49m[43m=[49m[33;43m'[39;49m[33;43mhdf5[39;49m[33;43m'[39;49m[43m)[49m
 
-[31mNameError[39m: name 'os' is not defined
+[36mFile [39m[32m/usr/share/miniconda/envs/buildjupyterbook/lib/python3.12/site-packages/madrigalWeb/madrigalWeb.py:1775[39m, in [36mMadrigalData.downloadFile[39m[34m(self, filename, destination, user_fullname, user_email, user_affiliation, format)[39m
+[32m   1773[39m     f = [38;5;28mopen[39m(destination, [33m'[39m[33mw[39m[33m'[39m)
+[32m   1774[39m [38;5;28;01melse[39;00m:
+[32m-> [39m[32m1775[39m     f = [38;5;28;43mopen[39;49m[43m([49m[43mdestination[49m[43m,[49m[43m [49m[33;43m'[39;49m[33;43mwb[39;49m[33;43m'[39;49m[43m)[49m
+[32m   1777[39m [38;5;28;01mwhile[39;00m([38;5;28;01mTrue[39;00m):
+[32m   1778[39m     [38;5;28;01mif[39;00m [38;5;28mformat[39m [38;5;129;01min[39;00m ([33m'[39m[33mascii[39m[33m'[39m, [33m'[39m[33msimple[39m[33m'[39m):
+
+[31mFileNotFoundError[39m: [Errno 2] No such file or directory: 'MANGO_Data/minime11_low_20230509.cedar.034.hdf5'
 

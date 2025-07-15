@@ -60,7 +60,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'src/FPI_tutorial';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Basic MANGO Tutorial" href="MANGO_Demo_CEDAR_2024.html" />
+    <link rel="prev" title="MANGO Imager Tutorial" href="MANGO_Demo_CEDAR_2024.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -179,8 +179,7 @@
             </li>
         </ul>
         <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="markdown.html">Markdown Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="MANGO_Demo_CEDAR_2024.html">Basic MANGO Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MANGO_Demo_CEDAR_2024.html">MANGO Imager Tutorial</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">FPI Tutorial</a></li>
 </ul>
 
@@ -426,14 +425,10 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fpi-data">FPI Data</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#can-load-in-fpi-data-and-plot-it">Can load in FPI data and plot it</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#define-some-helper-functions-needed-to-work-with-fpi-data">Define some helper functions needed to work with FPI data</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#load-the-hdf5-file-downloaded-from-madrigal">Load the HDF5 file downloaded from Madrigal</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#define-the-look-directions-and-convert-from-line-of-sight-to-horizontal-winds">Define the look directions and convert from line-of-sight to horizontal winds</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-a-plot-of-the-horizontal-winds">Create a plot of the horizontal winds</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#helper-functions">Helper Functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#download-and-load-fpi-data">Download and Load FPI Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#convert-from-los-to-horizontal-winds">Convert from LoS to Horizontal Winds</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-horizontal-winds">Plot Horizontal Winds</a></li>
 </ul>
             </nav>
         </div>
@@ -447,70 +442,22 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="fpi-tutorial">
 <h1>FPI Tutorial<a class="headerlink" href="#fpi-tutorial" title="Link to this heading">#</a></h1>
-<section id="fpi-data">
-<h2>FPI Data<a class="headerlink" href="#fpi-data" title="Link to this heading">#</a></h2>
-<section id="can-load-in-fpi-data-and-plot-it">
-<h3>Can load in FPI data and plot it<a class="headerlink" href="#can-load-in-fpi-data-and-plot-it" title="Link to this heading">#</a></h3>
-<p>Used madrigalWeb to download relevant FPI data from LOW. the <a class="reference external" href="http://globalDownload.py">globalDownload.py</a> function can be obtained by:</p>
-<p><code class="docutils literal notranslate"><span class="pre">wget</span> <span class="pre">http://cedar.openmadrigal.org/static/distributionFiles/madrigalWeb-3.2.3.tar.gz</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">globalDownload.py</span> <span class="pre">--verbose</span> <span class="pre">--url=http://cedar.openmadrigal.org</span> <span class="pre">--outputDir=/tmp</span> <span class="pre">--user_fullname=&quot;Jonathan+Makela&quot;</span> <span class="pre">--user_email=jmakela&#64;illinois.edu</span> <span class="pre">--user_affiliation=&quot;University+of+Illinois&quot;</span> <span class="pre">--format=&quot;hdf5&quot;</span> <span class="pre">--startDate=&quot;05/10/2023&quot;</span> <span class="pre">--endDate=&quot;05/12/2023&quot;</span> <span class="pre">--inst=5555</span></code></p>
-<p>Alternatively, the following code block uses the <a class="reference external" href="https://pypi.org/project/madrigalWeb/">madrigalWeb</a> python package to download the same data.  Note that it may take several minutes.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asi_directory</span> <span class="o">=</span> <span class="s1">&#39;MANGO_Data&#39;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">asi_directory</span> <span class="o">=</span> <span class="s1">&#39;MANGO_Data&#39;</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">madrigalWeb.madrigalWeb</span>
-
-<span class="c1">#constants</span>
-<span class="n">madrigalUrl</span> <span class="o">=</span> <span class="s1">&#39;http://cedar.openmadrigal.org&#39;</span>
-
-<span class="n">user_fullname</span> <span class="o">=</span> <span class="s1">&#39;Jonathan Makela&#39;</span>
-<span class="n">user_email</span> <span class="o">=</span> <span class="s1">&#39;jmakela@illinois.edu&#39;</span>
-<span class="n">user_affiliation</span> <span class="o">=</span> <span class="s1">&#39;University of Illinois&#39;</span>
-
-<span class="c1"># create the main object to get all needed info from Madrigal</span>
-<span class="n">madrigalObj</span> <span class="o">=</span> <span class="n">madrigalWeb</span><span class="o">.</span><span class="n">madrigalWeb</span><span class="o">.</span><span class="n">MadrigalData</span><span class="p">(</span><span class="n">madrigalUrl</span><span class="p">)</span>
-
-<span class="c1"># Lowel FPI</span>
-<span class="n">code</span> <span class="o">=</span> <span class="mi">5555</span>
-
-<span class="n">expList</span> <span class="o">=</span> <span class="n">madrigalObj</span><span class="o">.</span><span class="n">getExperiments</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="mi">2023</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2023</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">expList</span><span class="p">:</span>
-
-    <span class="n">fileList</span> <span class="o">=</span> <span class="n">madrigalObj</span><span class="o">.</span><span class="n">getExperimentFiles</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-    
-    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">fileList</span><span class="p">:</span>
-
-        <span class="n">outFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">asi_directory</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">outFile</span><span class="p">)</span>
-        <span class="n">madrigalObj</span><span class="o">.</span><span class="n">downloadFile</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">outFile</span><span class="p">,</span> <span class="n">user_fullname</span><span class="p">,</span> <span class="n">user_email</span><span class="p">,</span> <span class="n">user_affiliation</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;hdf5&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">24</span>
-<span class="g g-Whitespace">     </span><span class="mi">20</span> <span class="n">fileList</span> <span class="o">=</span> <span class="n">madrigalObj</span><span class="o">.</span><span class="n">getExperimentFiles</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">fileList</span><span class="p">:</span>
-<span class="ne">---&gt; </span><span class="mi">24</span>     <span class="n">outFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">asi_directory</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-<span class="g g-Whitespace">     </span><span class="mi">25</span>     <span class="nb">print</span><span class="p">(</span><span class="n">outFile</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">26</span>     <span class="n">madrigalObj</span><span class="o">.</span><span class="n">downloadFile</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">outFile</span><span class="p">,</span> <span class="n">user_fullname</span><span class="p">,</span> <span class="n">user_email</span><span class="p">,</span> <span class="n">user_affiliation</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;hdf5&#39;</span><span class="p">)</span>
-
-<span class="ne">NameError</span>: name &#39;os&#39; is not defined
-</pre></div>
-</div>
-</div>
-</div>
-</section>
-<section id="define-some-helper-functions-needed-to-work-with-fpi-data">
-<h3>Define some helper functions needed to work with FPI data<a class="headerlink" href="#define-some-helper-functions-needed-to-work-with-fpi-data" title="Link to this heading">#</a></h3>
+<section id="helper-functions">
+<h2>Helper Functions<a class="headerlink" href="#helper-functions" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">mangofpi_to_xarray</span><span class="p">(</span><span class="n">data_array</span><span class="p">):</span>
@@ -747,8 +694,70 @@ document.write(`
 </div>
 </div>
 </section>
-<section id="load-the-hdf5-file-downloaded-from-madrigal">
-<h3>Load the HDF5 file downloaded from Madrigal<a class="headerlink" href="#load-the-hdf5-file-downloaded-from-madrigal" title="Link to this heading">#</a></h3>
+<section id="download-and-load-fpi-data">
+<h2>Download and Load FPI Data<a class="headerlink" href="#download-and-load-fpi-data" title="Link to this heading">#</a></h2>
+<p>Used madrigalWeb to download relevant FPI data from LOW. the <a class="reference external" href="http://globalDownload.py">globalDownload.py</a> function can be obtained by:</p>
+<p><code class="docutils literal notranslate"><span class="pre">wget</span> <span class="pre">http://cedar.openmadrigal.org/static/distributionFiles/madrigalWeb-3.2.3.tar.gz</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">globalDownload.py</span> <span class="pre">--verbose</span> <span class="pre">--url=http://cedar.openmadrigal.org</span> <span class="pre">--outputDir=/tmp</span> <span class="pre">--user_fullname=&quot;Jonathan+Makela&quot;</span> <span class="pre">--user_email=jmakela&#64;illinois.edu</span> <span class="pre">--user_affiliation=&quot;University+of+Illinois&quot;</span> <span class="pre">--format=&quot;hdf5&quot;</span> <span class="pre">--startDate=&quot;05/10/2023&quot;</span> <span class="pre">--endDate=&quot;05/12/2023&quot;</span> <span class="pre">--inst=5555</span></code></p>
+<p>Alternatively, the following code block uses the <a class="reference external" href="https://pypi.org/project/madrigalWeb/">madrigalWeb</a> python package to download the same data.  Note that it may take several minutes.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">madrigalWeb.madrigalWeb</span>
+
+<span class="c1">#constants</span>
+<span class="n">madrigalUrl</span> <span class="o">=</span> <span class="s1">&#39;http://cedar.openmadrigal.org&#39;</span>
+
+<span class="n">user_fullname</span> <span class="o">=</span> <span class="s1">&#39;Jonathan Makela&#39;</span>
+<span class="n">user_email</span> <span class="o">=</span> <span class="s1">&#39;jmakela@illinois.edu&#39;</span>
+<span class="n">user_affiliation</span> <span class="o">=</span> <span class="s1">&#39;University of Illinois&#39;</span>
+
+<span class="c1"># create the main object to get all needed info from Madrigal</span>
+<span class="n">madrigalObj</span> <span class="o">=</span> <span class="n">madrigalWeb</span><span class="o">.</span><span class="n">madrigalWeb</span><span class="o">.</span><span class="n">MadrigalData</span><span class="p">(</span><span class="n">madrigalUrl</span><span class="p">)</span>
+
+<span class="c1"># Lowel FPI</span>
+<span class="n">code</span> <span class="o">=</span> <span class="mi">5555</span>
+
+<span class="n">expList</span> <span class="o">=</span> <span class="n">madrigalObj</span><span class="o">.</span><span class="n">getExperiments</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="mi">2023</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2023</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">expList</span><span class="p">:</span>
+
+    <span class="n">fileList</span> <span class="o">=</span> <span class="n">madrigalObj</span><span class="o">.</span><span class="n">getExperimentFiles</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">fileList</span><span class="p">:</span>
+
+        <span class="n">outFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">asi_directory</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">outFile</span><span class="p">)</span>
+        <span class="n">madrigalObj</span><span class="o">.</span><span class="n">downloadFile</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">outFile</span><span class="p">,</span> <span class="n">user_fullname</span><span class="p">,</span> <span class="n">user_email</span><span class="p">,</span> <span class="n">user_affiliation</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;hdf5&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>MANGO_Data/minime11_low_20230509.cedar.034.hdf5
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/usr/share/miniconda/envs/buildjupyterbook/lib/python3.12/site-packages/madrigalWeb/madrigalWeb.py:638: SyntaxWarning: invalid escape sequence &#39;\g&#39;
+  filters = re.sub(&#39;,([a-zA-Z])&#39;, &#39;?\g&lt;1&gt;&#39;, filters)
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">FileNotFoundError</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">26</span>
+<span class="g g-Whitespace">     </span><span class="mi">24</span> <span class="n">outFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">asi_directory</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">25</span> <span class="nb">print</span><span class="p">(</span><span class="n">outFile</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">26</span> <span class="n">madrigalObj</span><span class="o">.</span><span class="n">downloadFile</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">outFile</span><span class="p">,</span> <span class="n">user_fullname</span><span class="p">,</span> <span class="n">user_email</span><span class="p">,</span> <span class="n">user_affiliation</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;hdf5&#39;</span><span class="p">)</span>
+
+<span class="nn">File /usr/share/miniconda/envs/buildjupyterbook/lib/python3.12/site-packages/madrigalWeb/madrigalWeb.py:1775,</span> in <span class="ni">MadrigalData.downloadFile</span><span class="nt">(self, filename, destination, user_fullname, user_email, user_affiliation, format)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1773</span>     <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1774</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1775</span>     <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1777</span> <span class="k">while</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">1778</span>     <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;simple&#39;</span><span class="p">):</span>
+
+<span class="ne">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;MANGO_Data/minime11_low_20230509.cedar.034.hdf5&#39;
+</pre></div>
+</div>
+</div>
+</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># f = os.path.join(asi_directory, &#39;minime11_low_20230510_xg.cedar.034.hdf5&#39;)</span>
@@ -769,8 +778,8 @@ document.write(`
 </div>
 </div>
 </section>
-<section id="define-the-look-directions-and-convert-from-line-of-sight-to-horizontal-winds">
-<h3>Define the look directions and convert from line-of-sight to horizontal winds<a class="headerlink" href="#define-the-look-directions-and-convert-from-line-of-sight-to-horizontal-winds" title="Link to this heading">#</a></h3>
+<section id="convert-from-los-to-horizontal-winds">
+<h2>Convert from LoS to Horizontal Winds<a class="headerlink" href="#convert-from-los-to-horizontal-winds" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define el/az coords for each direction and create masks</span>
@@ -794,8 +803,8 @@ document.write(`
 </div>
 </div>
 </section>
-<section id="create-a-plot-of-the-horizontal-winds">
-<h3>Create a plot of the horizontal winds<a class="headerlink" href="#create-a-plot-of-the-horizontal-winds" title="Link to this heading">#</a></h3>
+<section id="plot-horizontal-winds">
+<h2>Plot Horizontal Winds<a class="headerlink" href="#plot-horizontal-winds" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="kn">import</span> <span class="n">DateFormatter</span>
@@ -826,7 +835,6 @@ document.write(`
 <img alt="../_images/6ac4c707b1b8fbb662313159587f2509aa64f2dea06b5048075592e91575ec3b.png" src="../_images/6ac4c707b1b8fbb662313159587f2509aa64f2dea06b5048075592e91575ec3b.png" />
 </div>
 </div>
-</section>
 </section>
 </section>
 
@@ -866,7 +874,7 @@ document.write(`
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Basic MANGO Tutorial</p>
+        <p class="prev-next-title">MANGO Imager Tutorial</p>
       </div>
     </a>
 </div>
@@ -885,14 +893,10 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fpi-data">FPI Data</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#can-load-in-fpi-data-and-plot-it">Can load in FPI data and plot it</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#define-some-helper-functions-needed-to-work-with-fpi-data">Define some helper functions needed to work with FPI data</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#load-the-hdf5-file-downloaded-from-madrigal">Load the HDF5 file downloaded from Madrigal</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#define-the-look-directions-and-convert-from-line-of-sight-to-horizontal-winds">Define the look directions and convert from line-of-sight to horizontal winds</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-a-plot-of-the-horizontal-winds">Create a plot of the horizontal winds</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#helper-functions">Helper Functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#download-and-load-fpi-data">Download and Load FPI Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#convert-from-los-to-horizontal-winds">Convert from LoS to Horizontal Winds</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-horizontal-winds">Plot Horizontal Winds</a></li>
 </ul>
   </nav></div>
 

@@ -1,8 +1,0 @@
-# Table of contents
-# Learn more at https://jupyterbook.org/customize/toc.html
-
-format: jb-book
-root: src/intro
-chapters:
-- file: src/MANGO_Demo_CEDAR_2024
-- file: src/FPI_tutorial

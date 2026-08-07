@@ -1,0 +1,32 @@
+version: 1
+project:
+  title: MANGO User Guide
+  authors:
+    - name: A. Bhatt
+    - name: J. Makela
+    - name: B. Harding
+    - name: L. Lamarche
+  exclude:
+    - README.md
+  github: mangonetwork/tutorials
+  thebe:
+    binder:
+      repo: mangonetwork/tutorials
+      provider: github
+      url: https://mybinder.org
+      ref: main
+  bibliography:
+    - src/references.bib
+  exports:
+    - format: pdf
+      template: plain_latex_book
+      output: exports/book.pdf
+  toc:
+    - file: src/intro.md
+    - file: src/MANGO_Demo_CEDAR_2024.ipynb
+    - file: src/FPI_tutorial.ipynb
+site:
+  options:
+    logo: logo.png
+    folders: true
+  template: book-theme
